@@ -1,0 +1,9 @@
+{
+  "name": "bot",
+  "version": "0.0.1",
+  "description": "bot used for ugent",
+  "main": "main.js",
+  "dependencies": {
+    "discord.js": "^13.7.0"
+  }
+}
