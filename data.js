@@ -1,0 +1,1 @@
+export const permissions = ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS']
