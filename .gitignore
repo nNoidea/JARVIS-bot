@@ -1,1 +1,13 @@
 .env
+.vagrant/
+.vscode
+
+/node_modules/*
+storage/
+
+config.json
+database.json
+database.dev.json
+database.prod.json
+config.dev.json
+config.prod.json
