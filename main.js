@@ -19,10 +19,13 @@ const commands = [];
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./other_commands').filter(file => file.endsWith('.js'));
 
+console.log(commandFiles);
 
 for (const file of commandFiles) {
     const command = require(`./other_commands/${file}`);
+    console.log(command.data)
     commands.push(command.data.toJSON());
+    console.log("tttt")
     client.commands.set(command.data.name, command);
 }
 
@@ -30,18 +33,17 @@ for (const file of commandFiles) {
 
 (async () => {
     try {
-        console.log("test");
         await rest.put(
             Routes.applicationGuildCommands(CLIENT_ID, TEST_GUILD_ID),
             { body: commands },
         );
-        console.log("test2");
     } catch (error) {
         console.error(error);
     }
 })();
 
 
+console.log("setup completed")
 
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
@@ -56,5 +58,5 @@ client.on('interactionCreate', async interaction => {
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
 });
-
+console.log("Bot is starting");
 client.login(TOKEN)
