@@ -15,7 +15,7 @@ function ALIVE() {
 }
 
 client.on("messageCreate", message_handler) // When a message send by someone, sends the message to `message_handler`
-function message_handler(message: any) {
+function message_handler(message: Message) {
     if (blacklist(message)) {
         archive_pdf_attachments(message)
         // ALL THE OTHER FUNCTIONS COME HERE!!!
