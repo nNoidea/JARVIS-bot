@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function () { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -38,16 +38,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _a, _b, _c, _d;
 exports.__esModule = true;
 var discord_js_1 = require("discord.js");
-var Discord = require("discord.js");
+var Discord = require("discord.js"); // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
 var client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 require("dotenv").config();
+var ids = require("./ids.json");
 client.login(process.env.TOKEN); // Log into discord.
 var currentYear = new Date().getFullYear(); // Gets the current year.
-var blacklisted_servers = (_a = process.env.BLACKLISTED_SERVERS) === null || _a === void 0 ? void 0 : _a.split(","); // Gets the blacklisted server list (mostly to ignore test servers etc).
-var blacklisted_categories = (_b = process.env.BLACKLISTED_CATEGORIES) === null || _b === void 0 ? void 0 : _b.split(","); // Gets the blacklisted categories where the bot shouldn't work.
-var blacklisted_channels = (_c = process.env.BLACKLISTED_CHANNELS) === null || _c === void 0 ? void 0 : _c.split(","); // Gets the blacklisted channels where the bot shouldn't work.
-var blacklisted_users = (_d = process.env.BLACKLISTED_USERS) === null || _d === void 0 ? void 0 : _d.split(","); // Gets the blacklisted user list.
-var bot_id = process.env.BOT_ID; // Bot's own id, to ignore his own messages if needed.
+var blacklisted_servers = (_a = ids.BLACKLISTED_SERVERS) === null || _a === void 0 ? void 0 : _a.split(","); // Gets the blacklisted server list (mostly to ignore test servers etc).
+var blacklisted_categories = (_b = ids.BLACKLISTED_CATEGORIES) === null || _b === void 0 ? void 0 : _b.split(","); // Gets the blacklisted categories where the bot shouldn't work.
+var blacklisted_channels = (_c = ids.BLACKLISTED_CHANNELS) === null || _c === void 0 ? void 0 : _c.split(","); // Gets the blacklisted channels where the bot shouldn't work.
+var blacklisted_users = (_d = ids.BLACKLISTED_USERS) === null || _d === void 0 ? void 0 : _d.split(","); // Gets the blacklisted user list.
+var bot_id = ids.BOT_ID; // Bot's own id, to ignore his own messages if needed.
 client.on("ready", ALIVE); // Logs when the bot is ready.
 function ALIVE() {
     console.log("BOT IS ACTIVE");
@@ -71,21 +72,21 @@ function archive_pdf_attachments(message) {
                         return [2 /*return*/];
                     } // Makes sure no bad types get through
                     amount_of_attachments = message.attachments.size // Gets the amount of files
-                        ;
+                    ;
                     array = [];
                     if (!(amount_of_attachments > 0)) return [3 /*break*/, 5];
                     // Filters out the pdf files and collects them in an array.
                     for (i = 0; i < amount_of_attachments; i++) {
                         file_name = (_a = message.attachments.at(i)) === null || _a === void 0 ? void 0 : _a.name // Gets the file name.
-                            ;
+                        ;
                         file_extension = get_file_extension(file_name) // Gets the file extension.
-                            ;
+                        ;
                         if (file_extension == "pdf") {
                             array.push(message.attachments.at(i)); // Saves attachment that are a pdf into an array.
                         }
                     }
                     channel_name = channel.name.toUpperCase() // This method returns the calling string value converted to uppercase.
-                        ;
+                    ;
                     thread_name = "ARCHIVE-".concat(channel_name, "-").concat(currentYear);
                     return [4 /*yield*/, unarchive_thread(thread_name, channel)];
                 case 1:
@@ -101,9 +102,9 @@ function archive_pdf_attachments(message) {
                         attachment_array.push(array[x].attachment);
                     }
                     user_message = message.content // The content of the message
-                        ;
+                    ;
                     user_id = (_b = message.guild) === null || _b === void 0 ? void 0 : _b.ownerId // Gets the id of the user
-                        ;
+                    ;
                     return [4 /*yield*/, thread.send(vanilla_message(":star_struck: <@".concat(user_id, "> :star_struck:\n ").concat(user_message), [], attachment_array))];
                 case 4:
                     _c.sent();

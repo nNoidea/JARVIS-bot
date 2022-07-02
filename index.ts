@@ -1,16 +1,17 @@
 import { Collection, Guild, Message, MessageAttachment, TextChannel, User } from "discord.js"
-const Discord = require("discord.js") // DON'T CHAGNE THIS, IT WILL BREAK THE COMPILED JS FILE
+const Discord = require("discord.js") // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] })
 require("dotenv").config()
+const ids = require("./ids.json")
 
 client.login(process.env.TOKEN) // Log into discord.
 const currentYear = new Date().getFullYear(); // Gets the current year.
 
-let blacklisted_servers = process.env.BLACKLISTED_SERVERS?.split(",") // Gets the blacklisted server list (mostly to ignore test servers etc).
-let blacklisted_categories = process.env.BLACKLISTED_CATEGORIES?.split(",") // Gets the blacklisted categories where the bot shouldn't work.
-let blacklisted_channels = process.env.BLACKLISTED_CHANNELS?.split(",")// Gets the blacklisted channels where the bot shouldn't work.
-let blacklisted_users = process.env.BLACKLISTED_USERS?.split(",") // Gets the blacklisted user list.
-let bot_id = process.env.BOT_ID // Bot's own id, to ignore his own messages if needed.
+let blacklisted_servers = ids.BLACKLISTED_SERVERS?.split(",") // Gets the blacklisted server list (mostly to ignore test servers etc).
+let blacklisted_categories = ids.BLACKLISTED_CATEGORIES?.split(",") // Gets the blacklisted categories where the bot shouldn't work.
+let blacklisted_channels = ids.BLACKLISTED_CHANNELS?.split(",")// Gets the blacklisted channels where the bot shouldn't work.
+let blacklisted_users = ids.BLACKLISTED_USERS?.split(",") // Gets the blacklisted user list.
+let bot_id = ids.BOT_ID // Bot's own id, to ignore his own messages if needed.
 
 
 client.on("ready", ALIVE) // Logs when the bot is ready.
