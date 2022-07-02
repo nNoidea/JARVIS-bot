@@ -60,9 +60,10 @@ async function archive_pdf_attachments(message: Message) {
             attachment_array.push(array[x].attachment)
         }
 
+        let user_message = message.content // The content of the message
         // Sends everything in 1 message, this permits async problems, 2 users sending files at the same time will still be separate in the thread
         let user_id = message.guild?.ownerId // Gets the id of the user
-        await thread.send(vanilla_message(`:flushed: <@${ user_id }> :partying_face:`, [], attachment_array))
+        await thread.send(vanilla_message(`:star_struck: <@${ user_id }> :star_struck:\n ${user_message}`, [], attachment_array))
     }
     else { console.log("no attachments") }
 }
