@@ -1,4 +1,4 @@
-import { Collection, Guild, Message, TextChannel, User } from "discord.js"
+import { Collection, Guild, Message, MessageAttachment, TextChannel, User } from "discord.js"
 
 const Discord = require("discord.js")
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] })
@@ -21,11 +21,9 @@ function ALIVE() {
 
 client.on("messageCreate", message_handler) // When a message send by someone, sends the message to `message_handler`.
 function message_handler(message: Message) {
-    if (blacklist_server(message)) {
-        if (blacklist_category(message)) {
-            archive_pdf_attachments(message)
-            // ALL THE OTHER FUNCTIONS COME HERE!!!
-        }
+    if (blacklist_server(message) && blacklist_category(message)) {
+        archive_pdf_attachments(message)
+        // ALL THE OTHER FUNCTIONS COME HERE!!!
     }
 }
 
@@ -56,24 +54,27 @@ async function archive_pdf_attachments(message: Message) {
             thread = await create_thread(thread_name, channel)
         }
 
-        let user_id = message.guild?.ownerId // Gets the id of the user
-        await thread.send(vanilla_message(`:flushed: <@${ user_id }> :partying_face:`, []))
-        // Sends all the files to the thread
+        // Puts all the attachments in a single array
+        let attachment_array: any = []
         for (let x = 0; x < array.length; x++) {
-            await thread.send({
-                files: [array[x].attachment]
-            })
+            attachment_array.push(array[x].attachment)
         }
+
+        // Sends everything in 1 message, this permits async problems, 2 users sending files at the same time will still be separate in the thread
+        let user_id = message.guild?.ownerId // Gets the id of the user
+        await thread.send(vanilla_message(`:flushed: <@${ user_id }> :partying_face:`, [], attachment_array))
     }
     else { console.log("no attachments") }
 }
 
 // Sends a vanilla (not embedded) message. You can also mention users with text interpolation (`SOMETHING <@${ user_id }> SOMETHING`). 
 // Leave the `notification_user_id_array` empty ([]) if you don't want anyone to get pinged, or fill it with user_id's to ping them.
-function vanilla_message(message_content: string, notification_user_id_array: string[]) {
+// Also allows for sending attachments, leave it empty if there aren't any
+function vanilla_message(message_content: string, notification_user_id_array = [], attachment_array = []) {
     let message: any = {
         content: message_content,
         allowedMentions: { users: notification_user_id_array },
+        files: attachment_array
     }
     return message
 }
@@ -111,7 +112,7 @@ async function unarchive_thread(name: string, channel: TextChannel) {
     await channel.threads.fetchArchived() // Caches the archived threads, active ones are normally automatically cached. 'await' is needed, because the bot does not wait for that function and might continue executing following code without caching.
 
     let thread = channel.threads.cache.find((x: any) => x.name === name);
-    await thread?.setArchived(false); // Waits, because unarchiving is sometimes slower than the bot.
+    thread?.setArchived(false); // Waits, because unarchiving is sometimes slower than the bot.
     if (thread == undefined) {
         return false
     }
