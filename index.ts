@@ -1,4 +1,4 @@
-import { Collection, Guild, Message, MessageAttachment, TextChannel, User } from "discord.js"
+import { Guild, Message, TextChannel } from "discord.js"
 const Discord = require("discord.js") // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] })
 require("dotenv").config()
