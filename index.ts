@@ -14,7 +14,7 @@ let bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if
 
 
 client.on("ready", ALIVE) // Logs when the bot is ready.
-function ALIVE() {
+function ALIVE(): void {
     console.log("BOT IS ACTIVE")
 }
 
@@ -29,9 +29,9 @@ function message_handler(message: Message) {
 
 async function archive_pdf_attachments(message: Message) {
     let channel = message.channel
-    if (!(channel instanceof TextChannel)) { return } // Makes sure no bad types get through
+    if (!(channel instanceof TextChannel)) { return } // Makes sure no bad types get through.
 
-    let amount_of_attachments = message.attachments.size // Gets the amount of files
+    let amount_of_attachments = message.attachments.size // Gets the amount of files.
     let array: any = []
 
     if (amount_of_attachments > 0) {
@@ -44,26 +44,27 @@ async function archive_pdf_attachments(message: Message) {
                 array.push(message.attachments.at(i)) // Saves attachment that are a pdf into an array.
             }
         }
+        if (array.length > 0) {
+            let channel_name = channel.name.toUpperCase() // This method returns the calling string value converted to uppercase.
+            let thread_name = `ARCHIVE-${ channel_name }-${ currentYear }`
 
-        let channel_name = channel.name.toUpperCase() // This method returns the calling string value converted to uppercase.
-        let thread_name = `ARCHIVE-${ channel_name }-${ currentYear }`
+            let thread = await unarchive_thread(thread_name, channel)
+            if (thread == false) {
+                thread = await create_thread(thread_name, channel)
+            }
 
-        let thread = await unarchive_thread(thread_name, channel)
-        if (thread == false) {
-            thread = await create_thread(thread_name, channel)
+            // Puts all the attachments in a single array.
+            let attachment_array: any = []
+            for (let x = 0; x < array.length; x++) {
+                attachment_array.push(array[x].attachment)
+            }
+
+            let user_message = message.content // The content of the message.
+            // Sends everything in 1 message, this permits async problems, 2 users sending files at the same time will still be separate in the thread.
+            let user_id = message.guild?.ownerId // Gets the id of the user.
+            await thread.send(vanilla_message(`:star_struck: <@${ user_id }> :star_struck:\n ${ user_message }`, [], attachment_array))
+            console.log(`FILE SEND BY: <@${ user_id }> - ${ user_message }`)
         }
-
-        // Puts all the attachments in a single array
-        let attachment_array: any = []
-        for (let x = 0; x < array.length; x++) {
-            attachment_array.push(array[x].attachment)
-        }
-
-        let user_message = message.content // The content of the message
-        // Sends everything in 1 message, this permits async problems, 2 users sending files at the same time will still be separate in the thread
-        let user_id = message.guild?.ownerId // Gets the id of the user
-        await thread.send(vanilla_message(`:star_struck: <@${ user_id }> :star_struck:\n ${ user_message }`, [], attachment_array))
-        console.log(`FILE SEND BY: <@${ user_id }> - ${ user_message }`)
     }
     //else { console.log("no attachments") }
 }
@@ -80,7 +81,7 @@ function vanilla_message(message_content: string, notification_user_id_array = [
     return message
 }
 
-// Only allows whitelisted servers
+// Only allows whitelisted servers.
 function whitelist_server(message: Message) {
     let server = message.guild
     if (!(server instanceof Guild)) { return } // Filtering out bad types.
@@ -97,7 +98,7 @@ function whitelist_server(message: Message) {
     }
 }
 
-// Ignores blacklisted categories
+// Ignores blacklisted categories.
 function blacklist_category(message: Message) {
     let channel = message.channel
     if (!(channel instanceof TextChannel)) { return } // Just making sure no funky business happens

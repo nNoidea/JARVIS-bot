@@ -68,8 +68,8 @@ function archive_pdf_attachments(message) {
                     channel = message.channel;
                     if (!(channel instanceof discord_js_1.TextChannel)) {
                         return [2 /*return*/];
-                    } // Makes sure no bad types get through
-                    amount_of_attachments = message.attachments.size // Gets the amount of files
+                    } // Makes sure no bad types get through.
+                    amount_of_attachments = message.attachments.size // Gets the amount of files.
                     ;
                     array = [];
                     if (!(amount_of_attachments > 0)) return [3 /*break*/, 5];
@@ -83,6 +83,7 @@ function archive_pdf_attachments(message) {
                             array.push(message.attachments.at(i)); // Saves attachment that are a pdf into an array.
                         }
                     }
+                    if (!(array.length > 0)) return [3 /*break*/, 5];
                     channel_name = channel.name.toUpperCase() // This method returns the calling string value converted to uppercase.
                     ;
                     thread_name = "ARCHIVE-".concat(channel_name, "-").concat(currentYear);
@@ -99,9 +100,9 @@ function archive_pdf_attachments(message) {
                     for (x = 0; x < array.length; x++) {
                         attachment_array.push(array[x].attachment);
                     }
-                    user_message = message.content // The content of the message
+                    user_message = message.content // The content of the message.
                     ;
-                    user_id = (_b = message.guild) === null || _b === void 0 ? void 0 : _b.ownerId // Gets the id of the user
+                    user_id = (_b = message.guild) === null || _b === void 0 ? void 0 : _b.ownerId // Gets the id of the user.
                     ;
                     return [4 /*yield*/, thread.send(vanilla_message(":star_struck: <@".concat(user_id, "> :star_struck:\n ").concat(user_message), [], attachment_array))];
                 case 4:
@@ -126,7 +127,7 @@ function vanilla_message(message_content, notification_user_id_array, attachment
     };
     return message;
 }
-// Only allows whitelisted servers
+// Only allows whitelisted servers.
 function whitelist_server(message) {
     var server = message.guild;
     if (!(server instanceof discord_js_1.Guild)) {
@@ -142,7 +143,7 @@ function whitelist_server(message) {
         return false;
     }
 }
-// Ignores blacklisted categories
+// Ignores blacklisted categories.
 function blacklist_category(message) {
     var _a;
     var channel = message.channel;
