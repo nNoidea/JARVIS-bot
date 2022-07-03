@@ -2,9 +2,9 @@
 .vagrant/
 .vscode
 
-/node_modules/*
+/node_modules
 storage/
-
+/notes/
 
 config.json
 database.json
