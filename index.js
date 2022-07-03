@@ -35,20 +35,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a, _b, _c, _d;
 exports.__esModule = true;
 var discord_js_1 = require("discord.js");
 var Discord = require("discord.js"); // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
 var client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 require("dotenv").config();
-var ids = require("./ids.json");
 client.login(process.env.TOKEN); // Log into discord.
 var currentYear = new Date().getFullYear(); // Gets the current year.
-var blacklisted_servers = (_a = ids.BLACKLISTED_SERVERS) === null || _a === void 0 ? void 0 : _a.split(","); // Gets the blacklisted server list (mostly to ignore test servers etc).
-var blacklisted_categories = (_b = ids.BLACKLISTED_CATEGORIES) === null || _b === void 0 ? void 0 : _b.split(","); // Gets the blacklisted categories where the bot shouldn't work.
-var blacklisted_channels = (_c = ids.BLACKLISTED_CHANNELS) === null || _c === void 0 ? void 0 : _c.split(","); // Gets the blacklisted channels where the bot shouldn't work.
-var blacklisted_users = (_d = ids.BLACKLISTED_USERS) === null || _d === void 0 ? void 0 : _d.split(","); // Gets the blacklisted user list.
-var bot_id = ids.BOT_ID; // Bot's own id, to ignore his own messages if needed.
+var blacklisted_servers = ["972173800508624936"]; // Gets the blacklisted server list (mostly to ignore test servers etc).
+var blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]; // Gets the blacklisted categories where the bot shouldn't work.
+var blacklisted_channels = []; // Gets the blacklisted channels where the bot shouldn't work.
+var blacklisted_users = []; // Gets the blacklisted user list.
+var bot_id = "923341724242313247"; // Bot's own id, to ignore his own messages if needed.
 client.on("ready", ALIVE); // Logs when the bot is ready.
 function ALIVE() {
     console.log("BOT IS ACTIVE");

@@ -2,16 +2,15 @@ import { Collection, Guild, Message, MessageAttachment, TextChannel, User } from
 const Discord = require("discord.js") // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] })
 require("dotenv").config()
-const ids = require("./ids.json")
 
 client.login(process.env.TOKEN) // Log into discord.
 const currentYear = new Date().getFullYear(); // Gets the current year.
 
-let blacklisted_servers = ids.BLACKLISTED_SERVERS?.split(",") // Gets the blacklisted server list (mostly to ignore test servers etc).
-let blacklisted_categories = ids.BLACKLISTED_CATEGORIES?.split(",") // Gets the blacklisted categories where the bot shouldn't work.
-let blacklisted_channels = ids.BLACKLISTED_CHANNELS?.split(",")// Gets the blacklisted channels where the bot shouldn't work.
-let blacklisted_users = ids.BLACKLISTED_USERS?.split(",") // Gets the blacklisted user list.
-let bot_id = ids.BOT_ID // Bot's own id, to ignore his own messages if needed.
+let blacklisted_servers = ["972173800508624936"] // Gets the blacklisted server list (mostly to ignore test servers etc).
+let blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
+let blacklisted_channels = [] // Gets the blacklisted channels where the bot shouldn't work.
+let blacklisted_users = []  // Gets the blacklisted user list.
+let bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if needed.
 
 
 client.on("ready", ALIVE) // Logs when the bot is ready.
