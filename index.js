@@ -42,7 +42,7 @@ var client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 require("dotenv").config();
 client.login(process.env.TOKEN); // Log into discord.
 var currentYear = new Date().getFullYear(); // Gets the current year.
-var blacklisted_servers = ["972173800508624936"]; // Gets the blacklisted server list (mostly to ignore test servers etc).
+var whitelisted_servers = ["891008003908730961"]; // Only allows whitelisted servers
 var blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]; // Gets the blacklisted categories where the bot shouldn't work.
 var blacklisted_channels = []; // Gets the blacklisted channels where the bot shouldn't work.
 var blacklisted_users = []; // Gets the blacklisted user list.
@@ -53,7 +53,7 @@ function ALIVE() {
 }
 client.on("messageCreate", message_handler); // When a message send by someone, sends the message to `message_handler`.
 function message_handler(message) {
-    if (blacklist_server(message) && blacklist_category(message)) {
+    if (whitelist_server(message) && blacklist_category(message)) {
         archive_pdf_attachments(message);
         // ALL THE OTHER FUNCTIONS COME HERE!!!
     }
@@ -126,20 +126,20 @@ function vanilla_message(message_content, notification_user_id_array, attachment
     };
     return message;
 }
-// Ignores blacklisted servers
-function blacklist_server(message) {
+// Only allows whitelisted servers
+function whitelist_server(message) {
     var server = message.guild;
     if (!(server instanceof discord_js_1.Guild)) {
         return;
     } // Filtering out bad types.
     // Checks if the category the message is typed is blacklisted or not.
     var server_id = server.id;
-    if (blacklisted_servers === null || blacklisted_servers === void 0 ? void 0 : blacklisted_servers.find(function (element) { return element == server_id; })) {
-        console.log("Blacklisted server | ".concat(server.name, ": ").concat(server_id));
-        return false;
+    if (whitelisted_servers === null || whitelisted_servers === void 0 ? void 0 : whitelisted_servers.find(function (element) { return element == server_id; })) {
+        return true;
     }
     else {
-        return true;
+        console.log("Blacklisted server | ".concat(server.name, ": ").concat(server_id));
+        return false;
     }
 }
 // Ignores blacklisted categories

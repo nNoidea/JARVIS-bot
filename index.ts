@@ -6,7 +6,7 @@ require("dotenv").config()
 client.login(process.env.TOKEN) // Log into discord.
 const currentYear = new Date().getFullYear(); // Gets the current year.
 
-let blacklisted_servers = ["972173800508624936"] // Gets the blacklisted server list (mostly to ignore test servers etc).
+let whitelisted_servers = ["891008003908730961"] // Only allows whitelisted servers
 let blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
 let blacklisted_channels = [] // Gets the blacklisted channels where the bot shouldn't work.
 let blacklisted_users = []  // Gets the blacklisted user list.
@@ -20,7 +20,7 @@ function ALIVE() {
 
 client.on("messageCreate", message_handler) // When a message send by someone, sends the message to `message_handler`.
 function message_handler(message: Message) {
-    if (blacklist_server(message) && blacklist_category(message)) {
+    if (whitelist_server(message) && blacklist_category(message)) {
         archive_pdf_attachments(message)
         // ALL THE OTHER FUNCTIONS COME HERE!!!
     }
@@ -80,18 +80,21 @@ function vanilla_message(message_content: string, notification_user_id_array = [
     return message
 }
 
-// Ignores blacklisted servers
-function blacklist_server(message: Message) {
+// Only allows whitelisted servers
+function whitelist_server(message: Message) {
     let server = message.guild
     if (!(server instanceof Guild)) { return } // Filtering out bad types.
 
     // Checks if the category the message is typed is blacklisted or not.
     let server_id = server.id
-    if (blacklisted_servers?.find(element => element == server_id)) {
+    if (whitelisted_servers?.find(element => element == server_id)) {
+
+        return true
+    }
+    else {
         console.log(`Blacklisted server | ${ server.name }: ${ server_id }`)
         return false
     }
-    else { return true }
 }
 
 // Ignores blacklisted categories
