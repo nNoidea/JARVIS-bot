@@ -64,7 +64,7 @@ async function archive_pdf_attachments(message: Message) {
         let user_id = message.guild?.ownerId // Gets the id of the user
         await thread.send(vanilla_message(`:star_struck: <@${ user_id }> :star_struck:\n ${ user_message }`, [], attachment_array))
     }
-    else { console.log("no attachments") }
+    //else { console.log("no attachments") }
 }
 
 // Sends a vanilla (not embedded) message. You can also mention users with text interpolation (`SOMETHING <@${ user_id }> SOMETHING`). 

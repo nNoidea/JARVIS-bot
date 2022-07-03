@@ -106,11 +106,8 @@ function archive_pdf_attachments(message) {
                     return [4 /*yield*/, thread.send(vanilla_message(":star_struck: <@".concat(user_id, "> :star_struck:\n ").concat(user_message), [], attachment_array))];
                 case 4:
                     _c.sent();
-                    return [3 /*break*/, 6];
-                case 5:
-                    console.log("no attachments");
-                    _c.label = 6;
-                case 6: return [2 /*return*/];
+                    _c.label = 5;
+                case 5: return [2 /*return*/];
             }
         });
     });
