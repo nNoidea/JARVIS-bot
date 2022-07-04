@@ -59,11 +59,11 @@ function message_handler(message) {
     }
 }
 function archive_pdf_attachments(message) {
-    var _a, _b;
+    var _a;
     return __awaiter(this, void 0, void 0, function () {
         var channel, amount_of_attachments, array, i, file_name, file_extension, channel_name, thread_name, thread, attachment_array, x, user_message, user_id;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     channel = message.channel;
                     if (!(channel instanceof discord_js_1.TextChannel)) {
@@ -89,12 +89,12 @@ function archive_pdf_attachments(message) {
                     thread_name = "ARCHIVE-".concat(channel_name, "-").concat(currentYear);
                     return [4 /*yield*/, unarchive_thread(thread_name, channel)];
                 case 1:
-                    thread = _c.sent();
+                    thread = _b.sent();
                     if (!(thread == false)) return [3 /*break*/, 3];
                     return [4 /*yield*/, create_thread(thread_name, channel)];
                 case 2:
-                    thread = _c.sent();
-                    _c.label = 3;
+                    thread = _b.sent();
+                    _b.label = 3;
                 case 3:
                     attachment_array = [];
                     for (x = 0; x < array.length; x++) {
@@ -102,13 +102,13 @@ function archive_pdf_attachments(message) {
                     }
                     user_message = message.content // The content of the message.
                     ;
-                    user_id = (_b = message.guild) === null || _b === void 0 ? void 0 : _b.ownerId // Gets the id of the user.
+                    user_id = message.author.id // Gets the id of the user.
                     ;
                     return [4 /*yield*/, thread.send(vanilla_message(":star_struck: <@".concat(user_id, "> :star_struck:\n ").concat(user_message), [], attachment_array))];
                 case 4:
-                    _c.sent();
+                    _b.sent();
                     console.log("FILE SEND BY: <@".concat(user_id, "> - ").concat(user_message));
-                    _c.label = 5;
+                    _b.label = 5;
                 case 5: return [2 /*return*/];
             }
         });
