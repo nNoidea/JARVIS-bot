@@ -62,8 +62,9 @@ async function archive_pdf_attachments(message: Message) {
 			let user_message = message.content // The content of the message.
 			// Sends everything in 1 message, this permits async problems, 2 users sending files at the same time will still be separate in the thread.
 			let user_id = message.author.id // Gets the id of the user.
+			let user_name = message.author.username
 			await thread.send(vanilla_message(`:star_struck: <@${ user_id }> :star_struck:\n ${ user_message }`, [], attachment_array))
-			console.log(`FILE SEND BY: <@${ user_id }> - ${ user_message }`)
+			console.log(`FILE SEND BY: ${ user_name }: ${ user_id } - ${ user_message }`)
 		}
 	}
 	//else { console.log("no attachments") }
@@ -103,10 +104,7 @@ function blacklisted(message: Message) {
 	let channel = message.channel
 	let user = message.author
 	// Just making sure no funky business happens, idk why TS does not requires the same for author.
-	if (!(channel instanceof TextChannel)) {
-		console.log("Not a TextChannel type, returning false")
-		return false
-	}
+	if (!(channel instanceof TextChannel)) { return }
 
 	let category_id = channel.parentId
 	let channel_id = channel.id
