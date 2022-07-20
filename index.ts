@@ -6,10 +6,12 @@ require("dotenv").config()
 client.login(process.env.TOKEN) // Log into discord.
 const currentYear = new Date().getFullYear(); // Gets the current year.
 
-let whitelisted_servers = ["891008003908730961"] // Only allows whitelisted servers
-let blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
-let blacklisted_channels = [] // Gets the blacklisted channels where the bot shouldn't work.
-let blacklisted_users = []  // Gets the blacklisted user list.
+// Only allows whitelisted servers
+//let whitelisted_servers = ["891008003908730961"] // Real server 
+let whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
+let blacklisted_categories: string[] = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
+let blacklisted_channels: string[] = ["972174000430125126"] // Gets the blacklisted channels where the bot shouldn't work.
+let blacklisted_users: string[] = []  // Gets the blacklisted user list.
 let bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if needed.
 
 client.on("ready", ALIVE) // Logs when the bot is ready.
@@ -19,9 +21,8 @@ function ALIVE(): void {
 
 client.on("messageCreate", message_handler) // When a message send by someone, sends the message to `message_handler`.
 function message_handler(message: Message) {
-	if (whitelist_server(message) && blacklist_category(message)) {
+	if (whitelist_server(message) && blacklisted(message)) {
 		archive_pdf_attachments(message)
-		// ALL THE OTHER FUNCTIONS COME HERE!!!
 	}
 }
 
@@ -98,14 +99,35 @@ function whitelist_server(message: Message) {
 }
 
 // Ignores blacklisted categories.
-function blacklist_category(message: Message) {
+function blacklisted(message: Message) {
 	let channel = message.channel
-	if (!(channel instanceof TextChannel)) { return } // Just making sure no funky business happens
-	
-	// Checks if the category the message is typed is blacklisted or not.
-	let parent_id = channel.parentId
-	if (blacklisted_categories?.find(element => element == parent_id)) {
-		console.log(`Blacklisted category | ${ channel.name } | ${ channel.parent?.name }: ${ parent_id }`)
+	let user = message.author
+	// Just making sure no funky business happens, idk why TS does not requires the same for author.
+	if (!(channel instanceof TextChannel)) {
+		console.log("Not a TextChannel type, returning false")
+		return false
+	}
+
+	let category_id = channel.parentId
+	let channel_id = channel.id
+	let user_id = user.id
+	// Check for blacklisted stuff
+	if (user_id == bot_id) { // So that the bot does not react to his own messages.
+		console.log(`Blacklisted bot itself`)
+		return false
+	}
+	else if (blacklisted_categories?.find(element => element == category_id)) {
+		console.log(`Blacklisted category | ${ channel.parent?.name }: ${ category_id }`)
+		return false
+	}
+	// Check for blacklisted channel
+	else if (blacklisted_channels?.find(element => element == channel_id)) {
+		console.log(`Blacklisted channel | ${ channel.name }: ${ channel_id }`)
+		return false
+	}
+	// Check for blacklisted user
+	else if (blacklisted_users?.find(element => element == user_id)) {
+		console.log(`Blacklisted user | ${ user.username }: ${ user_id }`)
 		return false
 	}
 	else { return true }
@@ -121,7 +143,6 @@ async function unarchive_thread(name: string, channel: TextChannel) {
 		return false
 	}
 	else { return thread }
-
 }
 
 // Creates a thread based on arguments
