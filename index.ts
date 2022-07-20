@@ -8,11 +8,11 @@ const currentYear = new Date().getFullYear(); // Gets the current year.
 
 // Only allows whitelisted servers
 //let whitelisted_servers = ["891008003908730961"] // Real server 
-let whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
-let blacklisted_categories: string[] = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
-let blacklisted_channels: string[] = ["972174000430125126"] // Gets the blacklisted channels where the bot shouldn't work.
-let blacklisted_users: string[] = []  // Gets the blacklisted user list.
-let bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if needed.
+const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
+const blacklisted_categories: string[] = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
+const blacklisted_channels: string[] = ["972174000430125126"] // Gets the blacklisted channels where the bot shouldn't work.
+const blacklisted_users: string[] = []  // Gets the blacklisted user list.
+const bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if needed.
 
 client.on("ready", ALIVE) // Logs when the bot is ready.
 function ALIVE(): void {
