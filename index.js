@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var discord_js_1 = require("discord.js");
 var Discord = require("discord.js"); // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
-var _a = require('discord.js'), Client = _a.Client, GatewayIntentBits = _a.GatewayIntentBits;
+var GatewayIntentBits = require('discord.js').GatewayIntentBits;
 var client = new Discord.Client({
     intents: [
         GatewayIntentBits.Guilds,

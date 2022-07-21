@@ -1,6 +1,6 @@
 import { Guild, Message, TextChannel } from "discord.js"
 const Discord = require("discord.js") // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
-const { Client, GatewayIntentBits } = require('discord.js');
+const { GatewayIntentBits } = require('discord.js');
 const client = new Discord.Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -9,10 +9,9 @@ const client = new Discord.Client({
 })
 
 require("dotenv").config()
-
 client.login(process.env.TOKEN) // Log into discord.
-const currentYear = new Date().getFullYear(); // Gets the current year.
 
+const currentYear = new Date().getFullYear(); // Gets the current year.
 // Only allows whitelisted servers
 //const whitelisted_servers: string[] = ["891008003908730961"] // Real server 
 const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
