@@ -38,13 +38,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var discord_js_1 = require("discord.js");
 var Discord = require("discord.js"); // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
-var client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
+var _a = require('discord.js'), Client = _a.Client, GatewayIntentBits = _a.GatewayIntentBits;
+var client = new Discord.Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+    ]
+});
 require("dotenv").config();
 client.login(process.env.TOKEN); // Log into discord.
 var currentYear = new Date().getFullYear(); // Gets the current year.
 // Only allows whitelisted servers
-var whitelisted_servers = ["891008003908730961"]; // Real server 
-//const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
+//const whitelisted_servers: string[] = ["891008003908730961"] // Real server 
+var whitelisted_servers = ["972173800508624936"]; // Test server (to easily switch while developing)
 var blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]; // Gets the blacklisted categories where the bot shouldn't work.
 var blacklisted_channels = ["972174000430125126"]; // Gets the blacklisted channels where the bot shouldn't work.
 var blacklisted_users = []; // Gets the blacklisted user list.
