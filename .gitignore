@@ -6,6 +6,8 @@
 storage/
 /notes/
 
+database
+
 config.json
 database.json
 database.dev.json

@@ -7,12 +7,13 @@ client.login(process.env.TOKEN) // Log into discord.
 const currentYear = new Date().getFullYear(); // Gets the current year.
 
 // Only allows whitelisted servers
-//let whitelisted_servers = ["891008003908730961"] // Real server 
-const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
+const whitelisted_servers: string[] = ["891008003908730961"] // Real server 
+//const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
 const blacklisted_categories: string[] = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
 const blacklisted_channels: string[] = ["972174000430125126"] // Gets the blacklisted channels where the bot shouldn't work.
 const blacklisted_users: string[] = []  // Gets the blacklisted user list.
 const bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if needed.
+
 
 client.on("ready", ALIVE) // Logs when the bot is ready.
 function ALIVE(): void {
@@ -63,7 +64,7 @@ async function archive_pdf_attachments(message: Message) {
 			// Sends everything in 1 message, this permits async problems, 2 users sending files at the same time will still be separate in the thread.
 			let user_id = message.author.id // Gets the id of the user.
 			let user_name = message.author.username
-			await thread.send(vanilla_message(`:star_struck: <@${ user_id }> :star_struck:\n ${ user_message }`, [], attachment_array))
+			await thread.send(vanilla_message_create(`:star_struck: <@${ user_id }> :star_struck:\n ${ user_message }`, [], attachment_array))
 			console.log(`FILE SEND BY: ${ user_name }: ${ user_id } - ${ user_message }`)
 		}
 	}
@@ -73,7 +74,7 @@ async function archive_pdf_attachments(message: Message) {
 // Sends a vanilla (not embedded) message. You can also mention users with text interpolation (`SOMETHING <@${ user_id }> SOMETHING`). 
 // Leave the `notification_user_id_array` empty ([]) if you don't want anyone to get pinged, or fill it with user_id's to ping them.
 // Also allows for sending attachments, leave it empty if there aren't any
-function vanilla_message(message_content: string, notification_user_id_array = [], attachment_array = []) {
+function vanilla_message_create(message_content: string, notification_user_id_array = [], attachment_array = []) {
 	let message: any = {
 		content: message_content,
 		allowedMentions: { users: notification_user_id_array },
@@ -143,7 +144,7 @@ async function unarchive_thread(name: string, channel: TextChannel) {
 	else { return thread }
 }
 
-// Creates a thread based on arguments
+// Creates a thread based on arguments.
 function create_thread(name: string, channel: TextChannel) {
 	let thread = channel.threads.create({
 		name: name,
@@ -152,9 +153,26 @@ function create_thread(name: string, channel: TextChannel) {
 	return thread
 }
 
-// Gets the file extension
-function get_file_extension(file_name: string) {
+// Gets the file extension.
+function get_file_extension(file_name: string): string {
 	let dot_index = file_name.lastIndexOf(".")
 	let file_extension = file_name.substring(dot_index + 1) // +1 is there to not include the dot char itself.
 	return file_extension
+}
+
+
+// Database.
+// To be able to add further attributes to the database, each message will represent 1 sort of variable.
+function score_change(user_id: string, score_amount: number) {
+	// Search for the user in the database (message of the bot).
+	// If it's users first score, register the user to the database by editting the message, also add his score.
+	// Add the score_amount to the user's score.
+}
+
+function edit_bot_message(channel_id: string, message: string) {
+
+}
+
+function get_message(channel_id: string, message_id: string) {
+	return client.channels.cache.get(channel_id).messages.fetch(message_id)
 }

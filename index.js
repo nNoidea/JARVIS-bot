@@ -42,9 +42,11 @@ var client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 require("dotenv").config();
 client.login(process.env.TOKEN); // Log into discord.
 var currentYear = new Date().getFullYear(); // Gets the current year.
-var whitelisted_servers = ["891008003908730961"]; // Only allows whitelisted servers
+// Only allows whitelisted servers
+var whitelisted_servers = ["891008003908730961"]; // Real server 
+//const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
 var blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]; // Gets the blacklisted categories where the bot shouldn't work.
-var blacklisted_channels = []; // Gets the blacklisted channels where the bot shouldn't work.
+var blacklisted_channels = ["972174000430125126"]; // Gets the blacklisted channels where the bot shouldn't work.
 var blacklisted_users = []; // Gets the blacklisted user list.
 var bot_id = "923341724242313247"; // Bot's own id, to ignore his own messages if needed.
 client.on("ready", ALIVE); // Logs when the bot is ready.
@@ -53,15 +55,14 @@ function ALIVE() {
 }
 client.on("messageCreate", message_handler); // When a message send by someone, sends the message to `message_handler`.
 function message_handler(message) {
-    if (whitelist_server(message) && blacklist_category(message)) {
+    if (whitelist_server(message) && blacklisted(message)) {
         archive_pdf_attachments(message);
-        // ALL THE OTHER FUNCTIONS COME HERE!!!
     }
 }
 function archive_pdf_attachments(message) {
     var _a;
     return __awaiter(this, void 0, void 0, function () {
-        var channel, amount_of_attachments, array, i, file_name, file_extension, channel_name, thread_name, thread, attachment_array, x, user_message, user_id;
+        var channel, amount_of_attachments, array, i, file_name, file_extension, channel_name, thread_name, thread, attachment_array, x, user_message, user_id, user_name;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -104,10 +105,11 @@ function archive_pdf_attachments(message) {
                     ;
                     user_id = message.author.id // Gets the id of the user.
                     ;
-                    return [4 /*yield*/, thread.send(vanilla_message(":star_struck: <@".concat(user_id, "> :star_struck:\n ").concat(user_message), [], attachment_array))];
+                    user_name = message.author.username;
+                    return [4 /*yield*/, thread.send(vanilla_message_create(":star_struck: <@".concat(user_id, "> :star_struck:\n ").concat(user_message), [], attachment_array))];
                 case 4:
                     _b.sent();
-                    console.log("FILE SEND BY: <@".concat(user_id, "> - ").concat(user_message));
+                    console.log("FILE SEND BY: ".concat(user_name, ": ").concat(user_id, " - ").concat(user_message));
                     _b.label = 5;
                 case 5: return [2 /*return*/];
             }
@@ -117,7 +119,7 @@ function archive_pdf_attachments(message) {
 // Sends a vanilla (not embedded) message. You can also mention users with text interpolation (`SOMETHING <@${ user_id }> SOMETHING`). 
 // Leave the `notification_user_id_array` empty ([]) if you don't want anyone to get pinged, or fill it with user_id's to ping them.
 // Also allows for sending attachments, leave it empty if there aren't any
-function vanilla_message(message_content, notification_user_id_array, attachment_array) {
+function vanilla_message_create(message_content, notification_user_id_array, attachment_array) {
     if (notification_user_id_array === void 0) { notification_user_id_array = []; }
     if (attachment_array === void 0) { attachment_array = []; }
     var message = {
@@ -144,16 +146,34 @@ function whitelist_server(message) {
     }
 }
 // Ignores blacklisted categories.
-function blacklist_category(message) {
+function blacklisted(message) {
     var _a;
     var channel = message.channel;
+    var user = message.author;
+    // Just making sure no funky business happens, idk why TS does not requires the same for author.
     if (!(channel instanceof discord_js_1.TextChannel)) {
         return;
-    } // Just making sure no funky business happens
-    // Checks if the category the message is typed is blacklisted or not.
-    var parent_id = channel.parentId;
-    if (blacklisted_categories === null || blacklisted_categories === void 0 ? void 0 : blacklisted_categories.find(function (element) { return element == parent_id; })) {
-        console.log("Blacklisted category | ".concat(channel.name, " | ").concat((_a = channel.parent) === null || _a === void 0 ? void 0 : _a.name, ": ").concat(parent_id));
+    }
+    var category_id = channel.parentId;
+    var channel_id = channel.id;
+    var user_id = user.id;
+    // Check for blacklisted stuff
+    if (user_id == bot_id) { // So that the bot does not react to his own messages.
+        console.log("Blacklisted bot itself");
+        return false;
+    }
+    else if (blacklisted_categories === null || blacklisted_categories === void 0 ? void 0 : blacklisted_categories.find(function (element) { return element == category_id; })) {
+        console.log("Blacklisted category | ".concat((_a = channel.parent) === null || _a === void 0 ? void 0 : _a.name, ": ").concat(category_id));
+        return false;
+    }
+    // Check for blacklisted channel
+    else if (blacklisted_channels === null || blacklisted_channels === void 0 ? void 0 : blacklisted_channels.find(function (element) { return element == channel_id; })) {
+        console.log("Blacklisted channel | ".concat(channel.name, ": ").concat(channel_id));
+        return false;
+    }
+    // Check for blacklisted user
+    else if (blacklisted_users === null || blacklisted_users === void 0 ? void 0 : blacklisted_users.find(function (element) { return element == user_id; })) {
+        console.log("Blacklisted user | ".concat(user.username, ": ").concat(user_id));
         return false;
     }
     else {
@@ -182,7 +202,7 @@ function unarchive_thread(name, channel) {
         });
     });
 }
-// Creates a thread based on arguments
+// Creates a thread based on arguments.
 function create_thread(name, channel) {
     var thread = channel.threads.create({
         name: name,
@@ -190,9 +210,21 @@ function create_thread(name, channel) {
     });
     return thread;
 }
-// Gets the file extension
+// Gets the file extension.
 function get_file_extension(file_name) {
     var dot_index = file_name.lastIndexOf(".");
     var file_extension = file_name.substring(dot_index + 1); // +1 is there to not include the dot char itself.
     return file_extension;
+}
+// Database.
+// To be able to add further attributes to the database, each message will represent 1 sort of variable.
+function score_change(user_id, score_amount) {
+    // Search for the user in the database (message of the bot).
+    // If it's users first score, register the user to the database by editting the message, also add his score.
+    // Add the score_amount to the user's score.
+}
+function edit_bot_message(channel_id, message) {
+}
+function get_message(channel_id, message_id) {
+    return client.channels.cache.get(channel_id).messages.fetch(message_id);
 }
