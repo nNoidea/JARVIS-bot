@@ -1,39 +1,51 @@
-import { Guild, Message, TextChannel } from "discord.js"
+require("dotenv").config()
 const Discord = require("discord.js") // DON'T CHANGE THIS, IT WILL BREAK THE COMPILED JS FILE
 const { GatewayIntentBits } = require('discord.js');
+let needle = require('needle');
+let fs = require(`fs`);
+
+import { Guild, Message, TextChannel } from "discord.js"
 const client = new Discord.Client({
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent
 	]
 })
 
-require("dotenv").config()
-client.login(process.env.TOKEN) // Log into discord.
-
-const currentYear = new Date().getFullYear(); // Gets the current year.
 // Only allows whitelisted servers
-//const whitelisted_servers: string[] = ["891008003908730961"] // Real server 
-const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
+const whitelisted_servers: string[] = ["891008003908730961"] // Real server 
+//const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
 const blacklisted_categories: string[] = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
 const blacklisted_channels: string[] = ["972174000430125126"] // Gets the blacklisted channels where the bot shouldn't work.
 const blacklisted_users: string[] = []  // Gets the blacklisted user list.
 const bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if needed.
+const database_channel_id: string = "1000855719786066081"
+const database_file = "database/database.txt"
 
-
+client.login(process.env.TOKEN) // Log into discord.
 client.on("ready", ALIVE) // Logs when the bot is ready.
-function ALIVE(): void {
+async function ALIVE() {
 	console.log("BOT IS ACTIVE")
+
+	// Downloads the latest database version
+	let channel = await client.channels.cache.get(database_channel_id)
+	let last_message_id = channel.lastMessageId
+	let message = await get_message(database_channel_id, last_message_id)
+	download_attachments(message, database_file)
+	await new Promise(f => setTimeout(f, 1000)); // Need to find a proper way to wait for the init_database(), this works for now and isn't terrible since it has to happen every other week or so.
+	console.log("DATABASE READY")
 }
 
 client.on("messageCreate", message_handler) // When a message send by someone, sends the message to `message_handler`.
 function message_handler(message: Message) {
 	if (whitelist_server(message) && blacklisted(message)) {
+		bad_get_user_score(message)
 		archive_pdf_attachments(message)
 	}
 }
 
-
+const currentYear = new Date().getFullYear(); // Gets the current year.
 async function archive_pdf_attachments(message: Message) {
 	let channel = message.channel
 	if (!(channel instanceof TextChannel)) { return } // Makes sure no bad types get through.
@@ -51,7 +63,10 @@ async function archive_pdf_attachments(message: Message) {
 				array.push(message.attachments.at(i)) // Saves attachment that are a pdf into an array.
 			}
 		}
+		let user_id = message.author.id // Gets the id of the user.
+
 		if (array.length > 0) {
+			score_change(user_id, 1 * array.length)
 			let channel_name = channel.name.toUpperCase() // This method returns the calling string value converted to uppercase.
 			let thread_name = `ARCHIVE-${ channel_name }-${ currentYear }`
 
@@ -68,25 +83,41 @@ async function archive_pdf_attachments(message: Message) {
 
 			let user_message = message.content // The content of the message.
 			// Sends everything in 1 message, this permits async problems, 2 users sending files at the same time will still be separate in the thread.
-			let user_id = message.author.id // Gets the id of the user.
+
 			let user_name = message.author.username
 			await thread.send(vanilla_message_create(`:star_struck: <@${ user_id }> :star_struck:\n ${ user_message }`, [], attachment_array))
 			console.log(`FILE SEND BY: ${ user_name }: ${ user_id } - ${ user_message }`)
 		}
 	}
-	//else { console.log("no attachments") }
 }
 
 // Sends a vanilla (not embedded) message. You can also mention users with text interpolation (`SOMETHING <@${ user_id }> SOMETHING`). 
 // Leave the `notification_user_id_array` empty ([]) if you don't want anyone to get pinged, or fill it with user_id's to ping them.
 // Also allows for sending attachments, leave it empty if there aren't any
-function vanilla_message_create(message_content: string, notification_user_id_array = [], attachment_array = []) {
+function vanilla_message_create(message_content: string = "", notification_user_id_array = [], attachment_array: any = []) {
 	let message: any = {
 		content: message_content,
 		allowedMentions: { users: notification_user_id_array },
 		files: attachment_array
 	}
 	return message
+}
+
+
+// for fast testing, need to change it into a slash command later
+function bad_get_user_score(message: Message) {
+	if (message.content == "Jarvis score") {
+		let database = read_database()
+		let index = database.indexOf(message.author.id)
+		let text = ""
+		if (index != -1) {
+			text = vanilla_message_create(database[index + 1])
+		}
+		else {
+			text = "0"
+		}
+		message.channel.send(text)
+	}
 }
 
 // Only allows whitelisted servers.
@@ -106,6 +137,8 @@ function whitelist_server(message: Message) {
 	}
 }
 
+
+
 // Ignores blacklisted categories.
 function blacklisted(message: Message) {
 	let channel = message.channel
@@ -118,7 +151,6 @@ function blacklisted(message: Message) {
 	let user_id = user.id
 	// Check for blacklisted stuff
 	if (user_id == bot_id) { // So that the bot does not react to his own messages.
-		console.log(`Blacklisted bot itself`)
 		return false
 	}
 	else if (blacklisted_categories?.find(element => element == category_id)) {
@@ -142,7 +174,7 @@ function blacklisted(message: Message) {
 async function unarchive_thread(name: string, channel: TextChannel) {
 	await channel.threads.fetchArchived() // Caches the archived threads, active ones are normally automatically cached. 'await' is needed, because the bot does not wait for that function and might continue executing following code without caching.
 
-	let thread = channel.threads.cache.find((x: any) => x.name === name);
+	let thread = channel.threads.cache.find((x: any) => x.name == name);
 	thread?.setArchived(false); // Waits, because unarchiving is sometimes slower than the bot.
 	if (thread == undefined) {
 		return false
@@ -166,19 +198,36 @@ function get_file_extension(file_name: string): string {
 	return file_extension
 }
 
-
-// Database.
-// To be able to add further attributes to the database, each message will represent 1 sort of variable.
-function score_change(user_id: string, score_amount: number) {
-	// Search for the user in the database (message of the bot).
-	// If it's users first score, register the user to the database by editting the message, also add his score.
-	// Add the score_amount to the user's score.
+function read_database() {
+	let file: string[] = fs.readFileSync(database_file, 'utf8').replaceAll("\r", "").split(",") // replaceAll removes the carriages returns from
+	return file
 }
 
-function edit_bot_message(channel_id: string, message: string) {
+// To be able to add further attributes to the database, each message will represent 1 sort of variable.
+async function score_change(user_id: string, score_amount: number) {
+	let data_array: string[] = read_database()
+	let index = data_array.indexOf(user_id)
 
+	if (index != -1) {
+		data_array[index + 1] = String(Number(data_array[index + 1]) + score_amount)
+	}
+	else {
+		data_array.push(user_id + "," + String(score_amount))
+	}
+
+	let array_string = data_array.toString()
+	fs.writeFileSync(database_file, array_string)
+
+	let channel = await client.channels.cache.get(database_channel_id)
+	await channel.send(vanilla_message_create("", [], [database_file]))
 }
 
 function get_message(channel_id: string, message_id: string) {
 	return client.channels.cache.get(channel_id).messages.fetch(message_id)
+}
+
+// downloads the first attachment
+// Modified it later to make it a more universal download solution
+function download_attachments(message: Message, location: String,) {
+	needle.get(message.attachments.first()?.url).pipe(fs.createWriteStream(location))
 }
