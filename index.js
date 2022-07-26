@@ -49,38 +49,25 @@ var client = new Discord.Client({
         GatewayIntentBits.MessageContent
     ]
 });
-// Only allows whitelisted servers
-var whitelisted_servers = ["891008003908730961"]; // Real server 
-//const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
-var blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]; // Gets the blacklisted categories where the bot shouldn't work.
-var blacklisted_channels = ["972174000430125126"]; // Gets the blacklisted channels where the bot shouldn't work.
-var blacklisted_users = []; // Gets the blacklisted user list.
-var bot_id = "923341724242313247"; // Bot's own id, to ignore his own messages if needed.
+var whitelisted_servers = ["891008003908730961"]; // Real server id.
+//const whitelisted_servers: string[] = ["972173800508624936"] // Test server id.
+var blacklisted_categories = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"];
+var blacklisted_channels = ["972174000430125126"];
+var blacklisted_users = [];
+var bot_id = "923341724242313247";
 var database_channel_id = "1000855719786066081";
 var database_file = "database/database.txt";
+var currentYear = new Date().getFullYear(); // Gets the current year.
+var data_array;
+// -- Main functions. --
 client.login(process.env.TOKEN); // Log into discord.
-client.on("ready", ALIVE); // Logs when the bot is ready.
+client.on("ready", ALIVE); // First function to be executed
 function ALIVE() {
     return __awaiter(this, void 0, void 0, function () {
-        var channel, last_message_id, message;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    console.log("BOT IS ACTIVE");
-                    return [4 /*yield*/, client.channels.cache.get(database_channel_id)];
-                case 1:
-                    channel = _a.sent();
-                    last_message_id = channel.lastMessageId;
-                    return [4 /*yield*/, get_message(database_channel_id, last_message_id)];
-                case 2:
-                    message = _a.sent();
-                    download_attachments(message, database_file);
-                    return [4 /*yield*/, new Promise(function (f) { return setTimeout(f, 1000); })];
-                case 3:
-                    _a.sent(); // Need to find a proper way to wait for the init_database(), this works for now and isn't terrible since it has to happen every other week or so.
-                    console.log("DATABASE READY");
-                    return [2 /*return*/];
-            }
+            console.log("BOT IS ALIVE!");
+            set_database();
+            return [2 /*return*/];
         });
     });
 }
@@ -91,7 +78,7 @@ function message_handler(message) {
         archive_pdf_attachments(message);
     }
 }
-var currentYear = new Date().getFullYear(); // Gets the current year.
+// -- Other functions.
 function archive_pdf_attachments(message) {
     var _a;
     return __awaiter(this, void 0, void 0, function () {
@@ -167,7 +154,7 @@ function vanilla_message_create(message_content, notification_user_id_array, att
 // for fast testing, need to change it into a slash command later
 function bad_get_user_score(message) {
     if (message.content == "Jarvis score") {
-        var database = read_database();
+        var database = data_array;
         var index = database.indexOf(message.author.id);
         var text = "";
         if (index != -1) {
@@ -265,18 +252,13 @@ function get_file_extension(file_name) {
     var file_extension = file_name.substring(dot_index + 1); // +1 is there to not include the dot char itself.
     return file_extension;
 }
-function read_database() {
-    var file = fs.readFileSync(database_file, 'utf8').replaceAll("\r", "").split(","); // replaceAll removes the carriages returns from
-    return file;
-}
 // To be able to add further attributes to the database, each message will represent 1 sort of variable.
 function score_change(user_id, score_amount) {
     return __awaiter(this, void 0, void 0, function () {
-        var data_array, index, array_string, channel;
+        var index, array_string, channel;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    data_array = read_database();
                     index = data_array.indexOf(user_id);
                     if (index != -1) {
                         data_array[index + 1] = String(Number(data_array[index + 1]) + score_amount);
@@ -297,12 +279,48 @@ function score_change(user_id, score_amount) {
         });
     });
 }
+// Gets the message based on where the channel is and which message it is (ids).
 function get_message(channel_id, message_id) {
     return client.channels.cache.get(channel_id).messages.fetch(message_id);
 }
-// downloads the first attachment
-// Modified it later to make it a more universal download solution
-function download_attachments(message, location) {
+// Had to create a Promise, since createWriteStream() does not provide one.
+function download_file(url, save_location) {
+    return new Promise(function (resolve, reject) {
+        needle.get(url).pipe(fs.createWriteStream(save_location)).on('done', function (err) {
+            if (err)
+                reject(err);
+            resolve();
+        });
+    });
+}
+// Downloads the latest database version
+function set_database() {
     var _a;
-    needle.get((_a = message.attachments.first()) === null || _a === void 0 ? void 0 : _a.url).pipe(fs.createWriteStream(location));
+    return __awaiter(this, void 0, void 0, function () {
+        var channel, last_message_id, last_message, url, file;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, client.channels.cache.get(database_channel_id)]; // Get channel.
+                case 1:
+                    channel = _b.sent() // Get channel.
+                    ;
+                    last_message_id = channel.lastMessageId // Get last message id.
+                    ;
+                    return [4 /*yield*/, get_message(database_channel_id, last_message_id)]; // Get last message.
+                case 2:
+                    last_message = _b.sent() // Get last message.
+                    ;
+                    url = (_a = last_message.attachments.at(0)) === null || _a === void 0 ? void 0 : _a.url // Get the url of the last message's file.
+                    ;
+                    return [4 /*yield*/, download_file(url, database_file)]; // Download the file.
+                case 3:
+                    _b.sent(); // Download the file.
+                    file = fs.readFileSync(database_file, 'utf8').replaceAll("\r", "").split(",") // replaceAll removes the carriages returns from
+                    ;
+                    data_array = file;
+                    console.log("DATABASE READY");
+                    return [2 /*return*/];
+            }
+        });
+    });
 }

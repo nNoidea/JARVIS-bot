@@ -13,28 +13,25 @@ const client = new Discord.Client({
 	]
 })
 
-// Only allows whitelisted servers
-const whitelisted_servers: string[] = ["891008003908730961"] // Real server 
-//const whitelisted_servers: string[] = ["972173800508624936"] // Test server (to easily switch while developing)
-const blacklisted_categories: string[] = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]  // Gets the blacklisted categories where the bot shouldn't work.
-const blacklisted_channels: string[] = ["972174000430125126"] // Gets the blacklisted channels where the bot shouldn't work.
-const blacklisted_users: string[] = []  // Gets the blacklisted user list.
-const bot_id = "923341724242313247" // Bot's own id, to ignore his own messages if needed.
+const whitelisted_servers: string[] = ["891008003908730961"] // Real server id.
+//const whitelisted_servers: string[] = ["972173800508624936"] // Test server id.
+const blacklisted_categories: string[] = ["892069299097854033", "974406410752389200", "893500599889453066", "921207383697555537", "892075698884333619", "921197835704205382", "973632998777970748", "970440283634417705"]
+const blacklisted_channels: string[] = ["972174000430125126"]
+const blacklisted_users: string[] = []
+const bot_id = "923341724242313247"
 const database_channel_id: string = "1000855719786066081"
 const database_file = "database/database.txt"
 
-client.login(process.env.TOKEN) // Log into discord.
-client.on("ready", ALIVE) // Logs when the bot is ready.
-async function ALIVE() {
-	console.log("BOT IS ACTIVE")
+const currentYear = new Date().getFullYear(); // Gets the current year.
+let data_array: string[]
 
-	// Downloads the latest database version
-	let channel = await client.channels.cache.get(database_channel_id)
-	let last_message_id = channel.lastMessageId
-	let message = await get_message(database_channel_id, last_message_id)
-	download_attachments(message, database_file)
-	await new Promise(f => setTimeout(f, 1000)); // Need to find a proper way to wait for the init_database(), this works for now and isn't terrible since it has to happen every other week or so.
-	console.log("DATABASE READY")
+// -- Main functions. --
+
+client.login(process.env.TOKEN) // Log into discord.
+client.on("ready", ALIVE) // First function to be executed
+async function ALIVE() {
+	console.log("BOT IS ALIVE!")
+	set_database()
 }
 
 client.on("messageCreate", message_handler) // When a message send by someone, sends the message to `message_handler`.
@@ -45,7 +42,8 @@ function message_handler(message: Message) {
 	}
 }
 
-const currentYear = new Date().getFullYear(); // Gets the current year.
+// -- Other functions.
+
 async function archive_pdf_attachments(message: Message) {
 	let channel = message.channel
 	if (!(channel instanceof TextChannel)) { return } // Makes sure no bad types get through.
@@ -107,7 +105,7 @@ function vanilla_message_create(message_content: string = "", notification_user_
 // for fast testing, need to change it into a slash command later
 function bad_get_user_score(message: Message) {
 	if (message.content == "Jarvis score") {
-		let database = read_database()
+		let database = data_array
 		let index = database.indexOf(message.author.id)
 		let text = ""
 		if (index != -1) {
@@ -198,14 +196,8 @@ function get_file_extension(file_name: string): string {
 	return file_extension
 }
 
-function read_database() {
-	let file: string[] = fs.readFileSync(database_file, 'utf8').replaceAll("\r", "").split(",") // replaceAll removes the carriages returns from
-	return file
-}
-
 // To be able to add further attributes to the database, each message will represent 1 sort of variable.
 async function score_change(user_id: string, score_amount: number) {
-	let data_array: string[] = read_database()
 	let index = data_array.indexOf(user_id)
 
 	if (index != -1) {
@@ -222,12 +214,32 @@ async function score_change(user_id: string, score_amount: number) {
 	await channel.send(vanilla_message_create("", [], [database_file]))
 }
 
+// Gets the message based on where the channel is and which message it is (ids).
 function get_message(channel_id: string, message_id: string) {
 	return client.channels.cache.get(channel_id).messages.fetch(message_id)
 }
 
-// downloads the first attachment
-// Modified it later to make it a more universal download solution
-function download_attachments(message: Message, location: String,) {
-	needle.get(message.attachments.first()?.url).pipe(fs.createWriteStream(location))
+// Had to create a Promise, since createWriteStream() does not provide one.
+function download_file(url: string, save_location: string) {
+	return new Promise<void>((resolve, reject) => {
+		needle.get(url).pipe(fs.createWriteStream(save_location)).on('done',
+			function (err: any) {
+				if (err) reject(err)
+
+				resolve()
+			})
+	})
+}
+
+// Downloads the latest database version
+async function set_database() {
+	let channel = await client.channels.cache.get(database_channel_id) // Get channel.
+	let last_message_id = channel.lastMessageId // Get last message id.
+	let last_message = await get_message(database_channel_id, last_message_id) // Get last message.
+	let url = last_message.attachments.at(0)?.url // Get the url of the last message's file.
+	await download_file(url, database_file) // Download the file.
+
+	let file: string[] = fs.readFileSync(database_file, 'utf8').replaceAll("\r", "").split(",") // replaceAll removes the carriages returns from
+	data_array = file
+	console.log("DATABASE READY")
 }
